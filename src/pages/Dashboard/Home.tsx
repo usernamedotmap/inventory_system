@@ -1,17 +1,17 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/SpoilageFruitRadial";
-import RecentOrders from "../../components/ecommerce/RecentOrders";
-import DemographicCard from "../../components/ecommerce/DemographicCard";
+import EcommerceMetrics from "../../components/dashboard/EcommerceMetrics";
+import MonthlySalesChart from "../../components/dashboard/MonthlySalesChart";
+import StatisticsChart from "../../components/dashboard/StatisticsChart";
+import MonthlyTarget from "../../components/dashboard/SpoilageFruitRadial";
+import RecentOrders from "../../components/dashboard/RecentOrders";
+import DemographicCard from "../../components/dashboard/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
 import { getAllProductsMutation } from "../../lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { useProductStore } from "../../hooks/Products/useProducts";
 import { useEffect, useState } from "react";
 import Skeleton from "../../components/common/Skeleton";
-import FreshFruitRadial from "../../components/ecommerce/SpoilageFruitRadial";
-import SpoilageFruitRadial from "../../components/ecommerce/FreshFruitRadial";
+import FreshFruitRadial from "../../components/dashboard/SpoilageFruitRadial";
+import SpoilageFruitRadial from "../../components/dashboard/FreshFruitRadial";
 import { useHydrationProducs } from "../../hooks/Hyrdation/useHydrationProducts";
 
 export default function Home() {

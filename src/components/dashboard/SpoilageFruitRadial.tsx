@@ -38,7 +38,7 @@ export default function SpoilageFruitRadial() {
       "Spoilage is critically high. Immediate action is needed!";
   } else if (spoilageRatio >= 20) {
     spoilageMessage =
-      "Spoilage is rising. Consider reviewing storage or supplier quality.";
+      "Spoilage is rising. Consider checking inventory.";
   } else if (spoilageRatio > 0) {
     spoilageMessage = "Spoilage is within acceptable range. Keep monitoring.";
   } else {

@@ -9,6 +9,7 @@ import { FruitStandLogo } from "../icons";
 import { AlertProps } from "../components/ui/alert/Alert";
 import { useInventoryStore } from "../hooks/Inventory/useInventoryStore";
 import { useHydrationProducs } from "../hooks/Hyrdation/useHydrationProducts";
+import SearchBar from "../components/header/SearchBar";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -45,41 +46,62 @@ const AppHeader: React.FC = () => {
   }, []);
 
   useHydrationProducs();
-   const inventory = useInventoryStore((state) => state.inventory);
+  const inventory = useInventoryStore((state) => state.inventory);
 
-   const alerts: AlertProps[] = inventory.flatMap((item) => {
-  const alertList: AlertProps[] = [];
+  const alerts: AlertProps[] = inventory.flatMap((item) => {
+    const alertList: AlertProps[] = [];
 
     const isExpired =
-    item.expirationDate && new Date(item.expirationDate) < new Date();
-  const isLowStock =
-    item.restockThreshold != null && item.quantity <= item.restockThreshold / 2;
+      item.expirationDate && new Date(item.expirationDate) < new Date();
+    const isLowStock =
+      item.restockThreshold != null &&
+      item.quantity <= item.restockThreshold / 2;
 
-  if (isExpired) {
-    alertList.push({
-      variant: "error",
-      title: "Expired Item",
-      message: `${item.productName} has expired.`,
-      showLink: true,
-      linkHref: `/inventory`,
-      linkText: "Review spoilage",
-    });
-  }
+    const expiringInDays = item.expirationDate
+      ? Math.ceil(
+          (new Date(item.expirationDate).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24)
+        )
+      : null;
+
+    const isExpiringSoon =
+      expiringInDays !== null && expiringInDays <= 2 && expiringInDays >= 0;
+
+    if (isExpired) {
+      alertList.push({
+        variant: "error",
+        title: "Expired Item",
+        message: `${item.productName} has expired.`,
+        showLink: true,
+        linkHref: `/inventory`,
+        linkText: "Review spoilage",
+      });
+    }
 
     if (isLowStock) {
-    alertList.push({
-      variant: "warning",
-      title: "Low Stock Alert",
-      message: `${item.productName} is below restock threshold.`,
-      showLink: true,
-      linkHref: `/inventory`,
-      linkText: "Restock now",
-    });
-  }
+      alertList.push({
+        variant: "warning",
+        title: "Low Stock Alert",
+        message: `${item.productName} is below restock threshold.`,
+        showLink: true,
+        linkHref: `/inventory`,
+        linkText: "Restock now",
+      });
+    }
 
-  return alertList;
-  
-})
+    if (isExpiringSoon) {
+      alertList.push({
+        variant: "warning",
+        title: "Expiring Soon",
+        message: `${item.productName} will expire in ${expiringInDays} day${expiringInDays === 1 ? "" : "s"}.`,
+        showLink: true,
+        linkHref: `/inventory`,
+        linkText: "Check inventory",
+      });
+    }
+
+    return alertList;
+  });
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -125,10 +147,12 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link to="/" className="lg:hidden">
-           <div className="gap-4 flex dark:flex ">
-                <FruitStandLogo className="w-10 h-10  dark:text-white" />
-                <h1 className="font-semibold text-2xl dark:text-white ">Mang Edgar FS</h1>
-              </div>
+            <div className="gap-4 flex dark:flex ">
+              <FruitStandLogo className="w-10 h-10  dark:text-white" />
+              <h1 className="font-semibold text-2xl dark:text-white ">
+                Mang Edgar FS
+              </h1>
+            </div>
           </Link>
 
           <button
@@ -151,40 +175,7 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          {/* <div className="hidden lg:block">
-            <form>
-              <div className="relative">
-                <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
-                  <svg
-                    className="fill-gray-500 dark:fill-gray-400"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z"
-                      fill=""
-                    />
-                  </svg>
-                </span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search or type command..."
-                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
-                />
-
-                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
-                  <span> ⌘ </span>
-                  <span> K </span>
-                </button>
-              </div>
-            </form>
-          </div> */}
+          <SearchBar />
         </div>
         <div
           className={`${

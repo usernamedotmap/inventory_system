@@ -12,7 +12,7 @@ import {
   useInventoryStore,
 } from "../../../hooks/Inventory/useInventoryStore";
 import { useModal } from "../../../hooks/useModal";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { InventoryDetailsModal } from "./InventoryDetailsModal";
 import { PencilIcon, TrashBinIcon } from "../../../icons";
 import InventoryEditModal from "./InventoryEditModal";
@@ -20,6 +20,7 @@ import DeleteModalInventory from "../../../pages/Inventory/DeleteModalInventory"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteInventoryMutation } from "../../../lib/api";
 import { toast } from "sonner";
+import { searchByName } from "../../../hooks/Products/useProducts";
 
 // Define the table data using the interface
 
@@ -34,19 +35,23 @@ export default function BasicTableOne() {
     null
   );
 
-  
   const inventories = useInventoryStore((state) => state.inventory);
+  const searchTerm = searchByName((state) => state.searchTerm);
 
-  const sortedInventories = [...inventories].sort((a, b) =>
-    a.productName.localeCompare(b.productName)
-  );
+  const sortedInventories = useMemo(() => {
+    return [...inventories]
+      .filter((p) =>
+        p.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => a.productName.localeCompare(b.productName));
+  }, [inventories, searchTerm]);
 
   const quyerClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: deleteInventoryMutation,
     onSuccess: () => {
-      quyerClient.invalidateQueries({ queryKey: ["inventory"]})
+      quyerClient.invalidateQueries({ queryKey: ["inventory"] });
       toast.success("Inventory item has been deleted");
     },
     onError: () => {
@@ -143,7 +148,7 @@ export default function BasicTableOne() {
                           onClose={() => setDeleteInventory(null)}
                           onConfirm={() => {
                             if (deleteInventory) {
-                              mutation.mutate({id: deleteInventory.id});
+                              mutation.mutate({ id: deleteInventory.id });
                               setDeleteInventory(null);
                             }
                           }}

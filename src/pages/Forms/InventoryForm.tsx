@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { InventorySchema } from "../../lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +22,7 @@ const InventoryForm = ({ onSubmit, item, isLoading }: InventoryFormProps) => {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<InventoryFormValues>({
     resolver: zodResolver(InventorySchema),
@@ -79,14 +80,20 @@ const InventoryForm = ({ onSubmit, item, isLoading }: InventoryFormProps) => {
       </div>
 
       <div>
-        <DatePicker
-          id="expirationDate"
-          label="Expiration Date"
-          placeholder="Select a date"
-          onChange={(dates, currentDateString) => {
-            setValue("expirationDate", dates[0]);
-          }}
+        <Controller
+          control={control}
+          name="expirationDate"
+          render={({ field }) => (
+            <DatePicker
+              id="expirationDate"
+              label="Expiration Date"
+              placeholder="Select a date"
+              value={field.value}
+              onChange={(dates) => field.onChange(dates[0])}
+            />
+          )}
         />
+
         {errors.expirationDate && (
           <p className="text-red-500 text-xs mt-1">
             {errors.expirationDate.message}
@@ -106,15 +113,15 @@ const InventoryForm = ({ onSubmit, item, isLoading }: InventoryFormProps) => {
 
       <div className="col-span-2">
         <button
-          disabled={isLoading }
+          disabled={isLoading}
           type="submit"
-           className={`px-4 py-2 text-white rounded transition ${
+          className={`px-4 py-2 text-white rounded transition ${
             isLoading
               ? "bg-blue-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700"
           }`}
         >
-           {isLoading ? (
+          {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <svg
                 className="w-4 h-4 animate-spin"

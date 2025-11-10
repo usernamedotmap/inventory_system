@@ -22,6 +22,11 @@ type ProductStore = {
   // fetchProducts: () => Promise<void>
 }
 
+interface SearchStore {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+}
+
 export const useProductStore = create<ProductStore>((set) => ({
 products: [],
 hasHydrated: false,
@@ -32,3 +37,8 @@ setProducts: (data) => set({products: data})
 //   },
 
 }));
+
+export const searchByName = create<SearchStore>((set) => ({
+  searchTerm:  "",
+  setSearchTerm: (data) => set({searchTerm: data})
+}))

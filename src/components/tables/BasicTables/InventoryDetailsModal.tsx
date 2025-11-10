@@ -1,4 +1,6 @@
+import { useHydrationProducs } from "../../../hooks/Hyrdation/useHydrationProducts";
 import { InventoryTypes } from "../../../hooks/Inventory/useInventoryStore";
+import { useProductStore } from "../../../hooks/Products/useProducts";
 import { formatDateTime } from "../../../lib/utils";
 
 type InventoryDetailsModalProps = {
@@ -12,7 +14,14 @@ export const InventoryDetailsModal = ({
 }: InventoryDetailsModalProps) => {
   const {dateOnly} = formatDateTime(item.expirationDate ?? new Date());
   const expirationDate = (item.expirationDate ?? new Date());
-  const isExpired = new Date() > new Date(expirationDate)
+  const isExpired = new Date() > new Date(expirationDate);
+
+  useHydrationProducs();
+  const i = useProductStore((state) => state.products);
+  const units = i.find((p) => p.name === item.productName);
+
+  
+  
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -32,6 +41,10 @@ export const InventoryDetailsModal = ({
           <div className="flex justify-between">
             <span className="font-medium">Quantity:</span>
             <span>{item.quantity}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Unit:</span>
+            <span>{units?.unit}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Spoiled:</span>

@@ -72,7 +72,7 @@ const Calendar: React.FC = () => {
   useEffect(() => {
     if (isInitialLoad.current) {
       isInitialLoad.current = false;
-      return; // skip saving during first render
+      return; // skip saving during first rendera
     }
 
     localStorage.setItem("calendarEvents", JSON.stringify(events));

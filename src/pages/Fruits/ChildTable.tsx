@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,6 +8,8 @@ import {
 } from "../../components/ui/table";
 import {
   ProductTypes,
+  searchByName,
+  useProductStore,
 } from "../../hooks/Products/useProducts";
 import { PencilIcon, TrashBinIcon } from "../../icons";
 import { formatDateTime } from "../../lib/utils";
@@ -20,14 +22,21 @@ import DeleteFruitsModal from "./DeleteFruitsModal";
 
 const ChildTable = () => {
   // const [isReady, setIsReady] = useState(false);
+  useHydrationProducs();
   const [deleteFruits, setDeleteFruits] = useState<ProductTypes | null>(null);
   const [editFruits, setEditFruits] = useState<ProductTypes | null>(null);
 
-  const { products } = useHydrationProducs();
+  const { products } = useProductStore();
+  const searchTerm = searchByName((state) => state.searchTerm);
 
-  const sortedProducts = [...products].sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  const sortedProducts = useMemo(() => {
+  return [...products]
+    .filter((p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+}, [products, searchTerm]);
+
 
   const queryClient = useQueryClient();
 
@@ -42,10 +51,7 @@ const ChildTable = () => {
     },
   });
 
-
-
   return (
-    
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
         <Table>
@@ -112,39 +118,47 @@ const ChildTable = () => {
                           onClose={() => setEditFruits(null)}
                         />
                       )}
-                    
-                      <button disabled={mutation.isPending} className="p-2 rounded hover:bg-red-400 dark:hover:bg-red-400 transition" onClick={() => setDeleteFruits(fruits)}>
-                      {mutation.isPending ?  <svg
-                className="w-4 h-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg> : <TrashBinIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />}  
+
+                      <button
+                        disabled={mutation.isPending}
+                        className="p-2 rounded hover:bg-red-400 dark:hover:bg-red-400 transition"
+                        onClick={() => setDeleteFruits(fruits)}
+                      >
+                        {mutation.isPending ? (
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            ></path>
+                          </svg>
+                        ) : (
+                          <TrashBinIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        )}
                       </button>
                       {deleteFruits?.id === fruits.id && (
-                      <DeleteFruitsModal
-                        onClose={() => setDeleteFruits(null)}
-                        onConfirm={() => {
-                          if (deleteFruits) {
-                            mutation.mutate({ id: deleteFruits.id });
-                            setDeleteFruits(null);
-                          }
-                        }}
-                      />
+                        <DeleteFruitsModal
+                          onClose={() => setDeleteFruits(null)}
+                          onConfirm={() => {
+                            if (deleteFruits) {
+                              mutation.mutate({ id: deleteFruits.id });
+                              setDeleteFruits(null);
+                            }
+                          }}
+                        />
                       )}
                     </div>
                   </TableCell>
